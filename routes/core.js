@@ -143,5 +143,27 @@ router.get('/nodes', isAuthenticated, async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
   });
+
+  router.get('/containers', isAuthenticated, async (req, res) => {
+    try {
+        const nodes = await db.get("nodes") || []; // Await the Promise to get the actual nodes
+
+        // Ensure nodes is an array
+        if (!Array.isArray(nodes)) {
+            console.warn('Expected nodes to be an array, but received:', nodes);
+            nodes = []; // Default to an empty array if not an array
+        }
+
+        res.render('cp/list', {
+            name: process.env.APP_NAME,
+            kvms: require('../routes/kvms.json'),
+            nodes,
+        });
+    } catch (error) {
+        console.error('Error fetching nodes:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
   
 module.exports = router;

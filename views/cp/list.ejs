@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= name %> KVM Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Dark Mode Background Gradient */
+        .bg-gradient-to-br {
+            background: linear-gradient(135deg, #1e293b, #4f46e5); /* dark blue to deep purple */
+        }
+        /* Dark Mode Form Container */
+        .form-container {
+            backdrop-filter: blur(8px);
+            background-color: rgba(31, 41, 55, 0.85); /* semi-transparent dark background */
+        }
+        /* Modal Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; 
+            z-index: 50; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-blue-900">
+
+    <div class="w-full max-w-6xl p-8 space-y-6 rounded-lg shadow-lg form-container">
+        <div class="text-center">
+            <h2 class="mt-4 text-4xl font-bold text-white">Manage KVM Instances</h2>
+            <p class="text-sm text-gray-400">Create and manage your KVM instances.</p>
+        </div>
+
+        <div class="text-right mb-4">
+            <button id="createKvmBtn" class="inline-block px-4 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">Create KVM</button>
+        </div>
+
+        <!-- KVM List -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-left text-gray-200">
+                <thead class="bg-gray-800">
+                    <tr>
+                        <th class="px-4 py-2">RAM</th>
+                        <th class="px-4 py-2">CORE</th>
+                        <th class="px-4 py-2">Container ID</th>
+                        <th class="px-4 py-2">SSH Session</th>
+                        <th class="px-4 py-2">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="kvmList" class="bg-gray-700">
+                    <% kvms.forEach(kvm => { %>
+                        <tr class="hover:bg-gray-600 transition duration-150 ease-in-out">
+                            <td class="px-6 py-4 border-b border-gray-600"><%= kvm.ram %>GB</td>
+                            <td class="px-6 py-4 border-b border-gray-600"><%= kvm.cores %></td>
+                            <td class="px-6 py-4 border-b border-gray-600">
+                                <!-- Check if container_ids exist and are an array -->
+                                <% if (kvm.container_ids && Array.isArray(kvm.container_ids)) { %>
+                                    <% kvm.container_ids.forEach(container_id => { %>
+                                        <div><%= container_id.substring(0, 11) %> %></div>
+                                    <% }) %>
+                                <% } else { %>
+                                    <div>No Container IDs</div>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 border-b border-gray-600">
+                                <!-- Check if ssh_commands exist and are an array -->
+                                <% if (kvm.ssh_commands && Array.isArray(kvm.ssh_commands)) { %>
+                                    <% kvm.ssh_commands.forEach(ssh_command => { %>
+                                        <div><%= ssh_command.replace("ssh session: ", "") %></div>
+                                    <% }) %>
+                                <% } else { %>
+                                    <div>No SSH Commands</div>
+                                <% } %>
+                            </td>
+                            <td class="px-6 py-4 border-b border-gray-600">
+                                <button class="text-red-500 hover:text-red-700">Delete</button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>                
+            </table>
+            
+        </div>
+    </div>
+
+    <!-- Modal for Creating a New KVM -->
+    <div id="createKvmModal" class="modal inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+        <div class="modal-content bg-white rounded-lg shadow-lg p-6 w-96">
+            <span id="closeModal" class="close cursor-pointer text-red-500 float-right text-2xl">&times;</span>
+            <h3 class="text-2xl font-bold mb-4">Create New KVM</h3>
+            <form id="createKvmForm" class="space-y-4">
+                <div>
+                    <label for="ram" class="block text-sm font-medium text-gray-700">Ram (GB):</label>
+                    <input type="number" id="ram" name="ram" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                <div>
+                    <label for="core" class="block text-sm font-medium text-gray-700">CPU Cores:</label>
+                    <input type="number" id="core" name="core" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                <div>
+                    <label for="nodeSelect" class="block text-sm font-medium text-gray-700">Select Node:</label>
+                    <select id="nodeSelect" name="nodeSelect" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" required>
+                        <% nodes.forEach(node => { %>
+                            <option value="<%= node.id %>"><%= node.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <button type="submit" class="w-full p-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition duration-200">Create KVM</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Modal Functionality
+        const modal = document.getElementById("createKvmModal");
+        const btn = document.getElementById("createKvmBtn");
+        const span = document.getElementById("closeModal");
+
+        btn.onclick = function() {
+            modal.style.display = "block";
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Function to handle KVM deletion
+        function kvmDelete(id, kvmName) {
+            if (confirm(`Are you sure you want to delete the KVM: ${kvmName}?`)) {
+                fetch(`/kvm/delete/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('KVM deleted successfully');
+                        location.reload();
+                    } else {
+                        throw new Error('Failed to delete the KVM');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting KVM:', error);
+                    alert('Error deleting KVM: ' + error.message);
+                });
+            }
+        }
+
+        // Form submission logic for creating a new KVM
+        document.getElementById("createKvmForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+    const ram = document.getElementById('ram').value; // Get RAM value
+    const cores = document.getElementById('core').value; // Get core value (change to cores)
+    const nodeIds = Array.from(document.getElementById('nodeSelect').selectedOptions).map(option => option.value); // Get selected node IDs as an array
+
+    try {
+        const response = await fetch(`/create-kvm`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json' // Set the content type
+            },
+            body: JSON.stringify({ ram, cores, nodeIds }) // Send the values as JSON
+        });
+
+        if (response.ok) {
+            alert("KVM Created!");
+            location.reload(); 
+            modal.style.display = "none"; // Close modal after creation
+        } else {
+            const errorData = await response.json();
+            alert("Error creating KVM: " + errorData.error); // Show specific error message
+        }
+    } catch (error) {
+        console.error('Error creating KVM:', error);
+    }
+});
+
+    </script>
+</body>
+</html>
