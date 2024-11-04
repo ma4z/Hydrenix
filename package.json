@@ -1,0 +1,32 @@
+{
+  "name": "hydrenix",
+  "version": "0.1.0-beta",
+  "description": "alternate to proxmox",
+  "main": "app.js",
+  "scripts": {
+    "test": "nodemon --verbose app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/ma4z/Hydrenix"
+  },
+  "author": "ma4z",
+  "license": "ISC",
+  "dependencies": {
+    "@keyv/sqlite": "^3.6.7",
+    "axios": "^1.7.7",
+    "body-parser": "^1.20.3",
+    "cat-loggr": "^1.2.2",
+    "chalk": "^5.3.0",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "express-ws": "^5.0.2",
+    "fs": "^0.0.1-security",
+    "keyv": "^4.5.4",
+    "nodemon": "^3.1.7",
+    "path": "^0.12.7",
+    "uuid": "^10.0.0"
+  }
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= name %> Control Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Dark Mode Background Gradient */
+        .bg-gradient-to-br {
+            background: linear-gradient(135deg, #1e293b, #4f46e5); /* dark blue to deep purple */
+        }
+        /* Dark Mode Form Container */
+        .form-container {
+            backdrop-filter: blur(8px);
+            background-color: rgba(31, 41, 55, 0.85); /* semi-transparent dark background */
+        }
+        /* Dark Text Colors */
+        .text-dark-heading {
+            color: #c4b5fd; /* light lavender */
+        }
+        .text-dark-subtext {
+            color: #9ca3af; /* cool gray */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-blue-900">
+
+    <div class="w-full max-w-6xl p-8 space-y-6 rounded-lg shadow-lg form-container">
+        <div class="text-center">
+            <h2 class="mt-4 text-4xl font-bold text-dark-heading">Control Panel</h2>
+            <p class="text-sm text-dark-subtext">Manage your settings and configurations.</p>
+        </div>
+
+        <div class="space-y-4">
+            <h3 class="text-2xl font-semibold text-dark-heading">Dashboard</h3>
+            <div class="bg-gray-800 p-4 rounded-lg">
+                <p class="text-dark-subtext">Welcome to the control panel. Here you can manage your application settings.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-gray-700 p-8 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+                    <h4 class="text-xl font-bold text-indigo-400">Nodes</h4>
+                    <p class="text-dark-subtext mb-4">List of available nodes:</p>
+                    <a href="/nodes" class="block mt-2 text-indigo-500 hover:underline">Manage Nodes</a>
+                </div>
+                <div class="bg-gray-700 p-8 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+                    <h4 class="text-xl font-bold text-indigo-400">Containers</h4>
+                    <p class="text-dark-subtext mb-4">Manage your containers here:</p>
+                    <a href="/containers" class="block mt-2 text-indigo-500 hover:underline">Manage Containers</a>
+                </div>
+                <div class="bg-gray-700 p-8 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+                    <h4 class="text-xl font-bold text-indigo-400">Images</h4>
+                    <p class="text-dark-subtext mb-4">Browse available images:</p>
+                    <a href="/images" class="block mt-2 text-indigo-500 hover:underline">View Images</a>
+                </div>
+                <div class="bg-gray-700 p-8 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+                    <h4 class="text-xl font-bold text-indigo-400">Uptime</h4>
+                    <p class="text-dark-subtext mb-4">Check system uptime:</p>
+                    <a href="/uptime" class="block mt-2 text-indigo-500 hover:underline">View Uptime</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-6">
+            <a href="/logout" class="inline-block p-2 text-white bg-red-600 rounded-lg hover:bg-red-700">Logout</a>
+        </div>
+    </div>
+
+</body>
+</html>
