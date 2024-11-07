@@ -119,12 +119,31 @@ router.get('/nodes', isAuthenticated, async (req, res) => {
         const nodes = await db.get("nodes") || []; // Ensure nodes is an empty array if undefined
         const nodesWithStatus = await Promise.all(nodes.map(async (node) => {
             try {
-                const statusResponse = await fetch(`http://${node.remote}:${node.port}/status?api_key=${node.id}`)
+                const statusResponse = await fetch(`http://${node.remote}:${node.port}/status?api_key=${node.id}`);
                 const statusJson = await statusResponse.json();
-                return {
-                    ...node,
-                    status: statusJson.status // Add the status to each node
-                };
+
+                // Destructure and provide default values in case properties are missing
+                const { status = "offline", used_ram = {}, total_ram = null,  total_cores = null, total_disk = null, used_disk = null, cpu_usage_percent = null } = statusJson;
+
+// Set default values for RAM and CPU usage if not provided
+const usedRam = used_ram || 0; // Default to 0 if `used_ram` is undefined
+const usedDisk = used_disk || 0;
+const totalCores = total_cores || 0; // Default to 0 if `used_ram` is undefined
+const totalDisk = total_disk || 0; // Default to 0 if `used_ram` is undefined
+const totalRam = total_ram || "N/A"; // Default to "N/A" if `total_ram` is unavailable
+const cpuUsage = cpu_usage_percent !== null ? cpu_usage_percent : "N/A"; // Default to "N/A" if CPU usage is unavailable
+
+return {
+    ...node,
+    status,                  // Node status (e.g., online or offline)
+    ram: usedRam,            // Used RAM value
+    disk: usedDisk,            // Used RAM value
+    totalRam,                // Total RAM value
+    totalDisk,  
+    totalCores,    
+    cpu: cpuUsage            // CPU usage percentage
+};
+
             } catch (err) {
                 console.error(`Error fetching status for node ${node.name}:`, err.message);
                 return {
@@ -142,7 +161,8 @@ router.get('/nodes', isAuthenticated, async (req, res) => {
         console.error('Error fetching nodes:', error);
         res.status(500).send('Internal Server Error');
     }
-  });
+});
+
 
   router.get('/containers', isAuthenticated, async (req, res) => {
     try {
@@ -156,7 +176,7 @@ router.get('/nodes', isAuthenticated, async (req, res) => {
 
         res.render('cp/list', {
             name: process.env.APP_NAME,
-            kvms: require('../routes/kvms.json'),
+            kvms: require('./kvms.json'),
             nodes,
         });
     } catch (error) {

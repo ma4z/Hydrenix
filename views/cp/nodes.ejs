@@ -63,28 +63,85 @@
                 </thead>
                 <tbody id="nodeList" class="bg-gray-700">
                     <% nodes.forEach(node => { %>
-                        <tr class="hover:bg-gray-600 transition duration-150 ease-in-out">
+                        <tr class="hover:bg-gray-600 transition duration-150 ease-in-out cursor-pointer"
+                            onclick="showNodeModal({
+                                name: '<%= node.name %>',
+                                status: '<%= node.status %>',
+                                cpuUsage: '<%= node.cpu %>%', // Replace with actual data if available
+                                totalCPU: '<%= node.totalCores %>', // Replace with actual data
+                                memoryUsed: '<%= node.ram %> GiB', // Replace with actual data
+                                memoryTotal: '<%= node.totalRam %> GiB', // Replace with actual data
+                                diskUsed: '<%= node.disk %> GiB', // Replace with actual data
+                                diskTotal: '<%= node.totalDisk %> GiB' // Replace with actual data
+                            })">
                             <td class="px-6 py-4 border-b border-gray-600"><%= node.name %></td>
                             <td class="px-6 py-4 border-b border-gray-600"><%= node.processor %></td>
                             <td class="px-6 py-4 border-b border-gray-600"><%= node.id %></td>
                             <td class="px-6 py-4 border-b border-gray-600"><%= node.remote %>:<%= node.port %></td>
                             <td class="px-6 py-4 border-b border-gray-600">
                                 <% if (node.status === "online") { %>
-                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                                 <% } else { %>
                                     <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                                    <% } %>
+                                <% } %>
                             </td>
                             <td class="px-6 py-4 border-b border-gray-600">
-                                <button class="text-red-500 hover:text-red-700 transition duration-200" onclick="nodeDelete('<%= node.id %>', '<%= node.name %>')">Delete</button>
+                                <button class="text-red-500 hover:text-red-700 transition duration-200" onclick="event.stopPropagation(); nodeDelete('<%= node.id %>', '<%= node.name %>')">Delete</button>
                             </td>
                         </tr>
                     <% }) %>
+                    
                 </tbody>                
             </table>
         </div>
     </div>
 
+    <div id="nodeModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 hidden transition-opacity duration-300">
+        <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 p-8 rounded-xl w-1/3 shadow-2xl transform transition-all duration-300 ease-in-out scale-100 hover:scale-105">
+            
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-extrabold text-white" id="modalNodeName">Node Details</h2>
+                <button onclick="closeModal()" class="text-white text-xl font-bold hover:text-gray-300 transition duration-200">&times;</button>
+            </div>
+            
+            <!-- Status -->
+            <div class="mb-4">
+                <p class="text-gray-400"><strong>Status:</strong> <span id="modalNodeStatus" class="text-green-400">N/A</span></p>
+            </div>
+    
+            <!-- CPU Usage -->
+            <div class="mb-4">
+                <p class="text-gray-400 mb-1"><strong>CPU Usage:</strong> <span id="modalNodeCPU" class="text-red-400">N/A</span></p>
+                <div class="w-full bg-gray-700 rounded-full h-4 shadow-inner">
+                    <div id="modalNodeCPUBar" class="bg-gradient-to-r from-red-500 to-red-700 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <!-- Memory Usage -->
+            <div class="mb-4">
+                <p class="text-gray-400 mb-1"><strong>Memory Usage:</strong> <span id="modalNodeMemory" class="text-blue-400">N/A</span></p>
+                <div class="w-full bg-gray-700 rounded-full h-4 shadow-inner">
+                    <div id="modalNodeMemoryBar" class="bg-gradient-to-r from-blue-500 to-blue-700 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <!-- Bootdisk Size -->
+            <div class="mb-4">
+                <p class="text-gray-400 mb-1"><strong>Bootdisk Size:</strong> <span id="modalNodeDisk" class="text-yellow-400">N/A</span></p>
+                <div class="w-full bg-gray-700 rounded-full h-4 shadow-inner">
+                    <div id="modalNodeDiskBar" class="bg-gradient-to-r from-yellow-500 to-yellow-700 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <!-- Close Button -->
+            <div class="flex justify-end">
+                <button onclick="closeModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold px-6 py-2 rounded-full shadow-lg hover:bg-indigo-700 transition duration-300">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    
     <!-- Modal for Creating a New Node -->
     <div id="createNodeModal" class="modal inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
         <div class="modal-content bg-white rounded-lg shadow-lg p-6 w-96">
@@ -186,6 +243,24 @@
         // Initial fetch to populate the node lis
 
     </script>
+    <script>
+        function showNodeModal(node) {
+            // Set the node details in the modal
+            document.getElementById('modalNodeName').innerText = node.name;
+            document.getElementById('modalNodeStatus').innerText = node.status;
+            document.getElementById('modalNodeCPU').innerText = `${node.cpuUsage} of ${node.totalCPU} CPUs`;
+            document.getElementById('modalNodeMemory').innerText = `${node.memoryUsed} of ${node.memoryTotal}`;
+            document.getElementById('modalNodeDisk').innerText = `${node.diskUsed} of ${node.diskTotal}`;
+    
+            // Show the modal
+            document.getElementById('nodeModal').classList.remove('hidden');
+        }
+    
+        function closeModal() {
+            document.getElementById('nodeModal').classList.add('hidden');
+        }
+    </script>
+    
     
 </body>
 </html>
